@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MONSTER CARDS .card GUI Unpack / Repack Tool</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #d7dce5;
+      --accent: #2563eb;
+      --accent2: #0f766e;
+      --danger: #b91c1c;
+      --warn: #92400e;
+      --ok: #166534;
+      --code: #111827;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #eef3ff 0%, var(--bg) 260px);
+    }
+    header {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 18px 14px;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    h2 { margin: 0 0 14px; font-size: 20px; }
+    h3 { margin: 0 0 10px; font-size: 16px; }
+    p { line-height: 1.55; }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 18px 40px;
+    }
+    .notice {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #7c2d12;
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-top: 12px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 960px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .wide { grid-column: 1 / -1; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 10px 0;
+    }
+    @media (max-width: 680px) {
+      .row { grid-template-columns: 1fr; gap: 5px; }
+    }
+    label { font-weight: 650; }
+    input[type="file"], input[type="text"], textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+    textarea {
+      min-height: 360px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre;
+      overflow: auto;
+    }
+    button, .buttonLike {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 13px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .05s ease, opacity .15s ease;
+      margin: 4px 6px 4px 0;
+    }
+    button.secondary, .buttonLike.secondary { background: #374151; }
+    button.teal, .buttonLike.teal { background: var(--accent2); }
+    button.warning, .buttonLike.warning { background: #b45309; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    button:not(:disabled):active { transform: translateY(1px); }
+    .muted { color: var(--muted); font-size: 13px; }
+    .status {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #f9fafb;
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+    }
+    .status.ok { border-color: #bbf7d0; background: #f0fdf4; color: var(--ok); }
+    .status.err { border-color: #fecaca; background: #fef2f2; color: var(--danger); }
+    .status.warn { border-color: #fde68a; background: #fffbeb; color: var(--warn); }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pill {
+      background: #f3f4f6;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 9px 10px;
+      font-size: 13px;
+    }
+    .pill b { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+    .images {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .imageBox {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fbfdff;
+    }
+    .previewWrap {
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(#e5e7eb 25%, #fff 0 50%, #e5e7eb 0 75%, #fff 0) 0 / 20px 20px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    .previewWrap img {
+      max-width: 100%;
+      max-height: 310px;
+      display: block;
+      image-rendering: auto;
+    }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    pre {
+      background: var(--code);
+      color: #e5e7eb;
+      padding: 12px;
+      border-radius: 12px;
+      overflow: auto;
+      font-size: 12px;
+    }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fafafa;
+      margin-top: 12px;
+    }
+    summary { cursor: pointer; font-weight: 700; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>MONSTER CARDS .card GUI Unpack / Repack Tool</h1>
+  <p class="muted">브라우저 안에서만 작동하는 단일 HTML 도구입니다. 카드 파일은 외부 서버로 업로드되지 않습니다.</p>
+  <p class="muted">룰과 매너를 지켜 듀얼하자! 이 프로그램을 상업적인 용도로 이용하지 말아주세요.! 꼭 배려를 해서 이용해주세요! @MKWOLF2022</p>
+  <div class="notice">
+    <b>중요:</b> 원본 <code>.card</code> 파일은 반드시 백업하세요. 이 도구는 사용자가 제공한 ES3 설정 기준으로 만든 비공식 편집 도구입니다. 게임 업데이트로 저장 포맷이 바뀌면 수정이 필요할 수 있습니다. 지나친 사용은 게임의 재미를 저해할 수 있습니다. 꼭 배려를 하면서 사용해주세요. 원작자 요청시 비공개됩니다.
+  </div>
+</header>
+
+<main class="grid">
+  <section class="card">
+    <h2>1. 파일 열기</h2>
+    <p class="muted">ES3Defaults.asset 가 없어도 기본 입력된 Password로 작업을 진행합니다.</p>
+    <p class="muted">Password가 변경된 경우 <code>ES3Defaults.asset</code> 파일을 넣어주세요.</p>
+    <p class="muted">혹은 <code>.card</code> 파일을 선택한 뒤 “카드 열기/분석”을 누르세요.</p>
+
+    <div class="row">
+      <label for="defaultsFile">ES3Defaults.asset</label>
+      <input id="defaultsFile" type="file" accept=".asset,.txt,.yaml,.yml,*/*" />
+    </div>
+    <div class="row">
+      <label for="passwordInput">비밀번호</label>
+      <input id="passwordInput" type="text" value="twoweeks" autocomplete="off" />
+    </div>
+    <p class="muted">ES3Defaults.asset을 넣으면 <code>encryptionPassword</code>를 자동으로 읽습니다. 수동 입력값이 비어있지 않으면 이 값을 사용합니다.</p>
+
+    <div class="row">
+      <label for="cardFile">카드 파일</label>
+      <input id="cardFile" type="file" accept=".card,*/*" />
+    </div>
+
+    <button id="openBtn">카드 열기/분석</button>
+    <button id="clearBtn" class="secondary">초기화</button>
+
+    <h3 style="margin-top:18px;">상태</h3>
+    <div id="status" class="status">대기 중입니다.</div>
+  </section>
+
+  <section class="card">
+    <h2>2. 카드 정보</h2>
+    <div id="summary" class="summary">
+      <div class="pill"><b>상태</b>아직 카드가 열리지 않았습니다.</div>
+    </div>
+    <details>
+      <summary>지원하는 구조</summary>
+      <pre>ES3 JSON format=0
+AES-CBC encryptionType=1
+Gzip compressionType=1
+PBKDF2-HMAC-SHA1(password, salt=IV, iterations=100, key=16 bytes)
+.card 앞 16바이트 = IV
+image1Bytes/image2Bytes/image3Bytes = base64 이미지 바이트</pre>
+    </details>
+  </section>
+
+  <section class="card wide">
+    <h2>3. 이미지 확인 / 교체</h2>
+    <p class="muted">카드가 열리면 <code>image1Bytes</code>, <code>image2Bytes</code>, <code>image3Bytes</code> 미리보기가 표시됩니다. 각 레이어에 새 PNG/JPG/WEBP 파일을 넣고 repack할 수 있습니다.</p>
+    <div id="images" class="images"></div>
+  </section>
+
+  <section class="card wide">
+    <h2>4. Unpack 다운로드</h2>
+    <p class="muted">현재 열린 카드의 <code>card.json</code>, 이미지 파일, <code>manifest.json</code>을 ZIP으로 저장합니다.</p>
+    <button id="downloadZipBtn" disabled>unpacked ZIP 다운로드</button>
+    <button id="downloadJsonBtn" class="secondary" disabled>card.json만 다운로드</button>
+  </section>
+
+  <section class="card wide">
+    <h2>5. JSON 고급 편집 / Repack</h2>
+    <p class="muted">일반적으로 이미지만 바꿔서 사용하시면 됩니다. 카드 이름/수치까지 직접 바꾸려면 JSON을 수정한 뒤 repack하세요. 단, JSON 구조를 망가뜨리면 게임에서 열리지 않을 수 있습니다.</p>
+    <div class="row">
+      <label for="jsonImport">card.json 불러오기</label>
+      <input id="jsonImport" type="file" accept=".json,application/json,*/*" />
+    </div>
+    <textarea id="jsonText" spellcheck="false" placeholder="카드를 열면 내부 ES3 JSON이 여기에 표시됩니다."></textarea>
+    <div style="margin-top:10px;">
+      <button id="applyJsonBtn" class="warning" disabled>JSON을 현재 카드에 적용</button>
+      <button id="repackBtn" class="teal" disabled>새 .card 다운로드</button>
+    </div>
+  </section>
+</main>
+
+<script>
+/*
+  MONSTER CARDS .card GUI Tool
+  ------------------------------------------------------------
+  이 HTML은 파이썬 없이 브라우저만으로 .card를 풀고 다시 묶기 위한 도구입니다.
+
+  확인된 .card 처리 순서:
+    읽기: .card bytes -> AES-CBC 복호화 -> gzip 압축해제 -> ES3 JSON 파싱
+    저장: ES3 JSON 문자열 -> gzip 압축 -> AES-CBC 암호화 -> .card bytes
+
+  브라우저 기능:
+    - crypto.subtle: PBKDF2 / AES-CBC 처리
+    - DecompressionStream / CompressionStream: gzip 처리
+    - Blob URL: 이미지 미리보기 및 다운로드
+
+  주의:
+    - Chrome / Edge 같은 최신 Chromium 계열 브라우저 권장
+    - Firefox/Safari 일부 버전은 CompressionStream 지원이 부족할 수 있음
+*/
+
+'use strict';
+
+// ------------------------------------------------------------
+// 전역 상태: 현재 열린 카드와 설정을 저장합니다.
+// ------------------------------------------------------------
+const state = {
+  settings: {
+    encryptionType: 1,
+    compressionType: 1,
+    password: 'twoweeks',
+    format: 0,
+  },
+  cardFileName: '',
+  cardObject: null,
+  imageObjectUrls: [],
+};
+
+// 자주 쓰는 DOM 요소 모음입니다.
+const $ = (id) => document.getElementById(id);
+const els = {
+  defaultsFile: $('defaultsFile'),
+  passwordInput: $('passwordInput'),
+  cardFile: $('cardFile'),
+  openBtn: $('openBtn'),
+  clearBtn: $('clearBtn'),
+  status: $('status'),
+  summary: $('summary'),
+  images: $('images'),
+  downloadZipBtn: $('downloadZipBtn'),
+  downloadJsonBtn: $('downloadJsonBtn'),
+  jsonImport: $('jsonImport'),
+  jsonText: $('jsonText'),
+  applyJsonBtn: $('applyJsonBtn'),
+  repackBtn: $('repackBtn'),
+};
+
+// ------------------------------------------------------------
+// UI 유틸리티
+// ------------------------------------------------------------
+function setStatus(message, kind = '') {
+  els.status.textContent = message;
+  els.status.className = 'status' + (kind ? ' ' + kind : '');
+}
+
+function enableWorkingButtons(enabled) {
+  els.downloadZipBtn.disabled = !enabled;
+  els.downloadJsonBtn.disabled = !enabled;
+  els.applyJsonBtn.disabled = !enabled;
+  els.repackBtn.disabled = !enabled;
+}
+
+function revokeImageUrls() {
+  for (const url of state.imageObjectUrls) URL.revokeObjectURL(url);
+  state.imageObjectUrls = [];
+}
+
+function resetAll() {
+  revokeImageUrls();
+  state.cardObject = null;
+  state.cardFileName = '';
+  els.cardFile.value = '';
+  els.jsonImport.value = '';
+  els.jsonText.value = '';
+  els.images.innerHTML = '';
+  els.summary.innerHTML = '<div class="pill"><b>상태</b>아직 카드가 열리지 않았습니다.</div>';
+  enableWorkingButtons(false);
+  setStatus('초기화했습니다.', 'ok');
+}
+
+function downloadBlob(blob, filename) {
+  const a = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // 바로 revoke하면 일부 브라우저에서 다운로드가 끊길 수 있어 약간 늦게 해제합니다.
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+function readFileAsArrayBuffer(file) {
+  return file.arrayBuffer();
+}
+
+function readFileAsText(file) {
+  return file.text();
+}
+
+function sanitizeBaseName(name) {
+  return (name || 'card').replace(/\.[^.]+$/, '').replace(/[\\/:*?"<>|]+/g, '_');
+}
+
+// ------------------------------------------------------------
+// ES3Defaults.asset 파싱
+// ------------------------------------------------------------
+function regexFindInt(text, key, defaultValue) {
+  const re = new RegExp('^\\s*' + escapeRegExp(key) + '\\s*:\\s*(-?\\d+)\\s*$', 'm');
+  const m = text.match(re);
+  return m ? Number(m[1]) : defaultValue;
+}
+
+function regexFindStr(text, key, defaultValue) {
+  const re = new RegExp('^\\s*' + escapeRegExp(key) + '\\s*:\\s*(.*?)\\s*$', 'm');
+  const m = text.match(re);
+  if (!m) return defaultValue;
+  let value = m[1].trim();
+  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+    value = value.slice(1, -1);
+  }
+  return value;
+}
+
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+async function loadSettingsFromUi() {
+  const settings = {
+    encryptionType: 1,
+    compressionType: 1,
+    password: 'twoweeks',
+    format: 0,
+  };
+
+  const defaultsFile = els.defaultsFile.files[0];
+  if (defaultsFile) {
+    const text = await readFileAsText(defaultsFile);
+    settings.encryptionType = regexFindInt(text, 'encryptionType', settings.encryptionType);
+    settings.compressionType = regexFindInt(text, 'compressionType', settings.compressionType);
+    settings.password = regexFindStr(text, 'encryptionPassword', settings.password);
+    settings.format = regexFindInt(text, 'format', settings.format);
+  }
+
+  // 사용자가 비밀번호 칸에 값을 직접 넣으면 그 값을 우선합니다.
+  const manualPassword = els.passwordInput.value;
+  if (manualPassword !== '') settings.password = manualPassword;
+
+  if (settings.format !== 0) {
+    throw new Error('현재 HTML 도구는 ES3 JSON format=0만 지원합니다. 감지된 format=' + settings.format);
+  }
+  if (![0, 1].includes(settings.encryptionType)) {
+    throw new Error('지원하지 않는 encryptionType=' + settings.encryptionType);
+  }
+  if (![0, 1].includes(settings.compressionType)) {
+    throw new Error('지원하지 않는 compressionType=' + settings.compressionType);
+  }
+
+  state.settings = settings;
+  return settings;
+}
+
+// ------------------------------------------------------------
+// 바이트 / 문자열 / base64 변환 유틸리티
+// ------------------------------------------------------------
+function concatUint8Arrays(arrays) {
+  const total = arrays.reduce((sum, arr) => sum + arr.length, 0);
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const arr of arrays) {
+    out.set(arr, offset);
+    offset += arr.length;
+  }
+  return out;
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
+
+function base64ToUint8Array(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+function bytesToUtf8(bytes) {
+  return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+}
+
+function utf8ToBytes(text) {
+  return new TextEncoder().encode(text);
+}
+
+function randomBytes(length) {
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return bytes;
+}
+
+// ------------------------------------------------------------
+// gzip 처리
+// ------------------------------------------------------------
+async function gzipDecompress(data) {
+  if (typeof DecompressionStream !== 'function') {
+    throw new Error('이 브라우저는 DecompressionStream(gzip)을 지원하지 않습니다. 최신 Chrome 또는 Edge를 사용하세요.');
+  }
+  const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+async function gzipCompress(data) {
+  if (typeof CompressionStream !== 'function') {
+    throw new Error('이 브라우저는 CompressionStream(gzip)을 지원하지 않습니다. 최신 Chrome 또는 Edge를 사용하세요.');
+  }
+  const stream = new Blob([data]).stream().pipeThrough(new CompressionStream('gzip'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+// ------------------------------------------------------------
+// ES3 AES-CBC 처리
+// ------------------------------------------------------------
+async function deriveAesKey(password, iv) {
+  // ES3 C# 코드의 Rfc2898DeriveBytes(password, IV, 100).GetBytes(16)와 맞춥니다.
+  // .NET 기본 PBKDF2 해시는 SHA-1입니다.
+  const passwordBytes = utf8ToBytes(password);
+  const baseKey = await crypto.subtle.importKey(
+    'raw',
+    passwordBytes,
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: iv,
+      iterations: 100,
+      hash: 'SHA-1',
+    },
+    baseKey,
+    { name: 'AES-CBC', length: 128 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function aesDecryptEs3(cardBytes, password) {
+  if (cardBytes.length < 32) throw new Error('암호화된 .card 파일이 너무 짧습니다.');
+  const iv = cardBytes.slice(0, 16);
+  const ciphertext = cardBytes.slice(16);
+  const key = await deriveAesKey(password, iv);
+
+  // WebCrypto AES-CBC는 PKCS#7 padding을 자동으로 제거합니다.
+  const plainBuffer = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, key, ciphertext);
+  return new Uint8Array(plainBuffer);
+}
+
+async function aesEncryptEs3(plainBytes, password) {
+  const iv = randomBytes(16);
+  const key = await deriveAesKey(password, iv);
+
+  // WebCrypto AES-CBC는 PKCS#7 padding을 자동으로 붙입니다.
+  const cipherBuffer = await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, key, plainBytes);
+  return concatUint8Arrays([iv, new Uint8Array(cipherBuffer)]);
+}
+
+// ------------------------------------------------------------
+// .card decode / encode
+// ------------------------------------------------------------
+async function decodeCardBytes(cardBytes, settings) {
+  let data = cardBytes;
+
+  // 저장 순서가 JSON -> gzip -> AES였으므로, 읽을 때는 AES -> gzip 순서입니다.
+  if (settings.encryptionType === 1) data = await aesDecryptEs3(data, settings.password);
+  if (settings.compressionType === 1) data = await gzipDecompress(data);
+
+  return data;
+}
+
+async function encodeCardBytes(jsonBytes, settings) {
+  let data = jsonBytes;
+
+  // 저장할 때는 JSON -> gzip -> AES 순서입니다.
+  if (settings.compressionType === 1) data = await gzipCompress(data);
+  if (settings.encryptionType === 1) data = await aesEncryptEs3(data, settings.password);
+
+  return data;
+}
+
+async function loadCardObjectFromFile(file, settings) {
+  const cardBytes = new Uint8Array(await readFileAsArrayBuffer(file));
+  const jsonBytes = await decodeCardBytes(cardBytes, settings);
+  const jsonText = bytesToUtf8(jsonBytes);
+  return JSON.parse(jsonText);
+}
+
+function dumpEs3Json(obj) {
+  // Python 버전과 비슷하게 탭 들여쓰기 + 마지막 줄바꿈을 넣습니다.
+  return JSON.stringify(obj, null, '\t') + '\n';
+}
+
+// ------------------------------------------------------------
+// ES3 byte[] 필드 및 이미지 처리
+// ------------------------------------------------------------
+function looksLikeBase64BytesEntry(value) {
+  if (!value || typeof value !== 'object') return false;
+  if (typeof value.value !== 'string') return false;
+  const typ = value.__type;
+  if (typ === 22) return true;
+  if (typeof typ === 'string' && typ.startsWith('System.Byte[]')) return true;
+  return false;
+}
+
+function iterImageKeys(obj) {
+  return Object.keys(obj)
+    .filter((key) => /^image\d+Bytes$/.test(key) && looksLikeBase64BytesEntry(obj[key]))
+    .sort((a, b) => {
+      const na = Number((a.match(/^image(\d+)Bytes$/) || [])[1] || 9999);
+      const nb = Number((b.match(/^image(\d+)Bytes$/) || [])[1] || 9999);
+      return na - nb || a.localeCompare(b);
+    });
+}
+
+function detectBinaryExtension(bytes) {
+  if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return '.png';
+  if (bytes.length >= 3 && bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return '.jpg';
+  if (bytes.length >= 6) {
+    const head6 = String.fromCharCode(...bytes.slice(0, 6));
+    if (head6 === 'GIF87a' || head6 === 'GIF89a') return '.gif';
+  }
+  if (bytes.length >= 12) {
+    const riff = String.fromCharCode(...bytes.slice(0, 4));
+    const webp = String.fromCharCode(...bytes.slice(8, 12));
+    if (riff === 'RIFF' && webp === 'WEBP') return '.webp';
+  }
+  if (bytes.length >= 3) {
+    if (bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) return '.mp3';
+    if (bytes[0] === 0xFF && [0xFB, 0xF3, 0xF2].includes(bytes[1])) return '.mp3';
+  }
+  return '.bin';
+}
+
+function decodeBase64Field(entry) {
+  return base64ToUint8Array(entry.value);
+}
+
+function setBase64Field(entry, bytes) {
+  entry.value = arrayBufferToBase64(bytes);
+}
+
+function getValue(obj, key, fallback = '') {
+  const entry = obj[key];
+  if (entry && typeof entry === 'object' && 'value' in entry) return entry.value;
+  return fallback;
+}
+
+function summarizeCard(obj) {
+  const keys = ['cardName', 'cardRubyName', 'cardUUID', 'rarity', 'power', 'element', 'species', 'means', 'size', 'skill', 'variantSkill'];
+  const summary = [];
+  for (const key of keys) summary.push([key, String(getValue(obj, key, ''))]);
+  for (const key of iterImageKeys(obj)) {
+    const raw = decodeBase64Field(obj[key]);
+    summary.push([key, raw.length + ' bytes, ' + detectBinaryExtension(raw)]);
+  }
+  if (obj.bgm && looksLikeBase64BytesEntry(obj.bgm)) {
+    const raw = decodeBase64Field(obj.bgm);
+    summary.push(['bgm', raw.length + ' bytes, ' + detectBinaryExtension(raw)]);
+  }
+  return summary;
+}
+
+// ------------------------------------------------------------
+// ZIP 만들기: 외부 라이브러리 없이 무압축 ZIP을 생성합니다.
+// ------------------------------------------------------------
+const crcTable = (() => {
+  const table = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    table[n] = c >>> 0;
+  }
+  return table;
+})();
+
+function crc32(bytes) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = crcTable[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+function dosDateTime(date = new Date()) {
+  const year = Math.max(1980, date.getFullYear());
+  const dosTime = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
+  const dosDate = ((year - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  return { dosTime, dosDate };
+}
+
+function writeU16(arr, value) { arr.push(value & 0xFF, (value >>> 8) & 0xFF); }
+function writeU32(arr, value) { arr.push(value & 0xFF, (value >>> 8) & 0xFF, (value >>> 16) & 0xFF, (value >>> 24) & 0xFF); }
+
+function makeZip(files) {
+  // files: [{ name: string, data: Uint8Array }]
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+  const { dosTime, dosDate } = dosDateTime();
+
+  for (const file of files) {
+    const nameBytes = utf8ToBytes(file.name);
+    const data = file.data instanceof Uint8Array ? file.data : new Uint8Array(file.data);
+    const crc = crc32(data);
+
+    const local = [];
+    writeU32(local, 0x04034b50); // local file header signature
+    writeU16(local, 20);         // version needed
+    writeU16(local, 0x0800);     // UTF-8 filename flag
+    writeU16(local, 0);          // compression method 0 = store
+    writeU16(local, dosTime);
+    writeU16(local, dosDate);
+    writeU32(local, crc);
+    writeU32(local, data.length);
+    writeU32(local, data.length);
+    writeU16(local, nameBytes.length);
+    writeU16(local, 0);          // extra length
+    const localHeader = concatUint8Arrays([new Uint8Array(local), nameBytes, data]);
+    localParts.push(localHeader);
+
+    const central = [];
+    writeU32(central, 0x02014b50); // central directory signature
+    writeU16(central, 20);         // version made by
+    writeU16(central, 20);         // version needed
+    writeU16(central, 0x0800);     // UTF-8 filename flag
+    writeU16(central, 0);          // store
+    writeU16(central, dosTime);
+    writeU16(central, dosDate);
+    writeU32(central, crc);
+    writeU32(central, data.length);
+    writeU32(central, data.length);
+    writeU16(central, nameBytes.length);
+    writeU16(central, 0);          // extra length
+    writeU16(central, 0);          // comment length
+    writeU16(central, 0);          // disk start
+    writeU16(central, 0);          // internal attrs
+    writeU32(central, 0);          // external attrs
+    writeU32(central, offset);     // local header offset
+    centralParts.push(concatUint8Arrays([new Uint8Array(central), nameBytes]));
+
+    offset += localHeader.length;
+  }
+
+  const centralStart = offset;
+  const centralData = concatUint8Arrays(centralParts);
+  offset += centralData.length;
+
+  const end = [];
+  writeU32(end, 0x06054b50); // end of central directory
+  writeU16(end, 0);          // disk number
+  writeU16(end, 0);          // central dir disk
+  writeU16(end, files.length);
+  writeU16(end, files.length);
+  writeU32(end, centralData.length);
+  writeU32(end, centralStart);
+  writeU16(end, 0);          // zip comment length
+
+  return concatUint8Arrays([...localParts, centralData, new Uint8Array(end)]);
+}
+
+function buildUnpackedFiles(obj) {
+  const files = [];
+  const jsonText = dumpEs3Json(obj);
+  files.push({ name: 'card.json', data: utf8ToBytes(jsonText) });
+
+  const manifest = {
+    note: 'card.json is the full ES3 JSON. Edit image files and use the GUI to repack, or use the Python tool repack command.',
+    byte_fields: {},
+  };
+
+  const imageKeySet = new Set(iterImageKeys(obj));
+
+  for (const key of imageKeySet) {
+    const raw = decodeBase64Field(obj[key]);
+    const ext = detectBinaryExtension(raw);
+    const filename = key + ext;
+    files.push({ name: filename, data: raw });
+    manifest.byte_fields[key] = filename;
+  }
+
+  // bgm처럼 이미지가 아닌 byte[]도 ZIP에 넣습니다.
+  for (const [key, entry] of Object.entries(obj)) {
+    if (imageKeySet.has(key)) continue;
+    if (!looksLikeBase64BytesEntry(entry)) continue;
+    try {
+      const raw = decodeBase64Field(entry);
+      const ext = detectBinaryExtension(raw);
+      const filename = key + ext;
+      files.push({ name: filename, data: raw });
+      manifest.byte_fields[key] = filename;
+    } catch (_) {
+      // 깨진 base64 값은 무시합니다.
+    }
+  }
+
+  files.push({ name: 'manifest.json', data: utf8ToBytes(JSON.stringify(manifest, null, 2)) });
+  return files;
+}
+
+// ------------------------------------------------------------
+// 화면 렌더링
+// ------------------------------------------------------------
+function renderSummary(obj) {
+  const rows = summarizeCard(obj);
+  els.summary.innerHTML = rows.map(([key, value]) => {
+    const safeKey = escapeHtml(key);
+    const safeValue = escapeHtml(value);
+    return `<div class="pill"><b>${safeKey}</b>${safeValue || '&nbsp;'}</div>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+}
+
+function renderImages(obj) {
+  revokeImageUrls();
+  els.images.innerHTML = '';
+
+  const keys = iterImageKeys(obj);
+  if (keys.length === 0) {
+    els.images.innerHTML = '<p class="muted">image1Bytes/image2Bytes/image3Bytes 필드를 찾지 못했습니다.</p>';
+    return;
+  }
+
+  for (const key of keys) {
+    const raw = decodeBase64Field(obj[key]);
+    const ext = detectBinaryExtension(raw);
+    const mime = extensionToMime(ext);
+    const blob = new Blob([raw], { type: mime });
+    const url = URL.createObjectURL(blob);
+    state.imageObjectUrls.push(url);
+
+    const box = document.createElement('div');
+    box.className = 'imageBox';
+    box.innerHTML = `
+      <h3>${escapeHtml(key)}</h3>
+      <div class="muted">${raw.length.toLocaleString()} bytes · ${escapeHtml(ext)}</div>
+      <div class="previewWrap"><img src="${url}" alt="${escapeHtml(key)} preview"></div>
+      <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,*/*" data-replace-key="${escapeHtml(key)}">
+      <button type="button" class="secondary" data-download-key="${escapeHtml(key)}">이 이미지 다운로드</button>
+    `;
+    els.images.appendChild(box);
+  }
+
+  // 이미지 교체 파일을 선택하면 현재 JSON의 base64 값을 바로 바꿉니다.
+  els.images.querySelectorAll('input[type="file"][data-replace-key]').forEach((input) => {
+    input.addEventListener('change', async () => {
+      const key = input.dataset.replaceKey;
+      const file = input.files[0];
+      if (!file) return;
+      try {
+        const bytes = new Uint8Array(await readFileAsArrayBuffer(file));
+        setBase64Field(state.cardObject[key], bytes);
+        els.jsonText.value = dumpEs3Json(state.cardObject);
+        renderImages(state.cardObject);
+        renderSummary(state.cardObject);
+        setStatus(`${key} 이미지를 교체했습니다. 이제 “새 .card 다운로드”를 누르면 됩니다.`, 'ok');
+      } catch (err) {
+        setStatus('이미지 교체 실패: ' + err.message, 'err');
+      }
+    });
+  });
+
+  // 개별 이미지 다운로드 버튼입니다.
+  els.images.querySelectorAll('button[data-download-key]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const key = button.dataset.downloadKey;
+      const raw = decodeBase64Field(state.cardObject[key]);
+      const ext = detectBinaryExtension(raw);
+      downloadBlob(new Blob([raw], { type: extensionToMime(ext) }), key + ext);
+    });
+  });
+}
+
+function extensionToMime(ext) {
+  return {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp',
+    '.mp3': 'audio/mpeg',
+  }[ext.toLowerCase()] || 'application/octet-stream';
+}
+
+// ------------------------------------------------------------
+// 버튼 동작
+// ------------------------------------------------------------
+els.openBtn.addEventListener('click', async () => {
+  try {
+    setStatus('카드를 여는 중입니다...');
+    enableWorkingButtons(false);
+    const cardFile = els.cardFile.files[0];
+    if (!cardFile) throw new Error('.card 파일을 선택하세요.');
+
+    const settings = await loadSettingsFromUi();
+    state.cardFileName = cardFile.name;
+    state.cardObject = await loadCardObjectFromFile(cardFile, settings);
+
+    renderSummary(state.cardObject);
+    renderImages(state.cardObject);
+    els.jsonText.value = dumpEs3Json(state.cardObject);
+    enableWorkingButtons(true);
+
+    const imageCount = iterImageKeys(state.cardObject).length;
+    setStatus(
+      `OK: 카드 열기 성공\n` +
+      `파일: ${cardFile.name}\n` +
+      `ES3: encryptionType=${settings.encryptionType}, compressionType=${settings.compressionType}, format=${settings.format}\n` +
+      `이미지 필드: ${imageCount}개`,
+      'ok'
+    );
+  } catch (err) {
+    console.error(err);
+    setStatus('ERROR: ' + err.message, 'err');
+  }
+});
+
+els.clearBtn.addEventListener('click', resetAll);
+
+els.downloadJsonBtn.addEventListener('click', () => {
+  if (!state.cardObject) return;
+  const blob = new Blob([dumpEs3Json(state.cardObject)], { type: 'application/json;charset=utf-8' });
+  downloadBlob(blob, 'card.json');
+});
+
+els.downloadZipBtn.addEventListener('click', () => {
+  if (!state.cardObject) return;
+  try {
+    const files = buildUnpackedFiles(state.cardObject);
+    const zipBytes = makeZip(files);
+    const base = sanitizeBaseName(state.cardFileName || 'card');
+    downloadBlob(new Blob([zipBytes], { type: 'application/zip' }), base + '_unpacked.zip');
+    setStatus(`OK: unpacked ZIP 생성 완료\n파일 수: ${files.length}`, 'ok');
+  } catch (err) {
+    console.error(err);
+    setStatus('ZIP 생성 실패: ' + err.message, 'err');
+  }
+});
+
+els.jsonImport.addEventListener('change', async () => {
+  const file = els.jsonImport.files[0];
+  if (!file) return;
+  try {
+    const text = await readFileAsText(file);
+    // JSON이 유효한지 미리 확인합니다.
+    JSON.parse(text);
+    els.jsonText.value = text;
+    setStatus('card.json을 불러왔습니다. “JSON을 현재 카드에 적용”을 누르면 반영됩니다.', 'ok');
+  } catch (err) {
+    setStatus('card.json 불러오기 실패: ' + err.message, 'err');
+  }
+});
+
+els.applyJsonBtn.addEventListener('click', () => {
+  try {
+    const obj = JSON.parse(els.jsonText.value);
+    state.cardObject = obj;
+    renderSummary(obj);
+    renderImages(obj);
+    setStatus('JSON을 현재 카드에 적용했습니다.', 'ok');
+  } catch (err) {
+    setStatus('JSON 파싱 실패: ' + err.message, 'err');
+  }
+});
+
+els.repackBtn.addEventListener('click', async () => {
+  try {
+    if (!state.cardObject) throw new Error('먼저 .card 파일을 열거나 card.json을 적용하세요.');
+
+    // textarea의 최신 내용을 우선 적용합니다. 사용자가 직접 수정한 내용을 놓치지 않기 위해서입니다.
+    const obj = JSON.parse(els.jsonText.value);
+    state.cardObject = obj;
+
+    const settings = await loadSettingsFromUi();
+    const jsonBytes = utf8ToBytes(dumpEs3Json(obj));
+    const cardBytes = await encodeCardBytes(jsonBytes, settings);
+
+    // 저장 직후 다시 풀어보는 자체 검증입니다.
+    const decoded = await decodeCardBytes(cardBytes, settings);
+    JSON.parse(bytesToUtf8(decoded));
+
+    const base = sanitizeBaseName(state.cardFileName || 'edited');
+    downloadBlob(new Blob([cardBytes], { type: 'application/octet-stream' }), base + '_edited.card');
+    setStatus('OK: 새 .card 생성 완료\n검증: 방금 만든 파일을 다시 복호화/압축해제/JSON 파싱까지 성공했습니다.', 'ok');
+  } catch (err) {
+    console.error(err);
+    setStatus('repack 실패: ' + err.message, 'err');
+  }
+});
+
+// ------------------------------------------------------------
+// 시작 시 브라우저 호환성 간단 점검
+// ------------------------------------------------------------
+(function checkCompatibility() {
+  const missing = [];
+  if (!crypto || !crypto.subtle) missing.push('WebCrypto crypto.subtle');
+  if (typeof CompressionStream !== 'function') missing.push('CompressionStream');
+  if (typeof DecompressionStream !== 'function') missing.push('DecompressionStream');
+
+  if (missing.length) {
+    setStatus('브라우저 호환성 문제: ' + missing.join(', ') + ' 기능이 없습니다. 최신 Chrome 또는 Edge를 권장합니다.', 'warn');
+  }
+})();
+</script>
+</body>
+</html>
