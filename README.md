@@ -2,10 +2,10 @@
 
 **20260611 ver**
 
-A simple browser-based tool for opening, analyzing, replacing images in, and repacking Monster Cards `.card` files. 
-On a Windows PC, you can download this project from GitHub by clicking the green “Code” button in the upper-right corner, then selecting “Download ZIP.”
-브라우저에서 Monster Cards의 `.card` 파일을 열고, 분석하고, 이미지를 교체한 뒤 다시 패킹할 수 있는 간단한 도구입니다.
-Windows PC GitHub 기준 우측 상단의 초록색 "Code" 버튼을 눌러 Download ZIP 로 다운로드 할 수 있습니다.
+A simple browser-based tool for opening, analyzing, replacing images in, and repacking Monster Cards `.card` files. <br>
+On a Windows PC, you can download this project from GitHub by clicking the green “Code” button in the upper-right corner, then selecting “Download ZIP.”<br>
+브라우저에서 Monster Cards의 `.card` 파일을 열고, 분석하고, 이미지를 교체한 뒤 다시 패킹할 수 있는 간단한 도구입니다.<br>
+Windows PC GitHub 기준 우측 상단의 초록색 "Code" 버튼을 눌러 Download ZIP 로 다운로드 할 수 있습니다.<br>
 
 ---
 
