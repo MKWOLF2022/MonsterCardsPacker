@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="app.title">MonsterCardsPacker - 20260611</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header>
+  <div class="topBar">
+    <div class="titleBlock">
+      <h1 data-i18n="app.title">MonsterCardsPacker</h1>
+      <p class="muted" data-i18n="app.subtitle">브라우저 안에서만 작동하는 단일 HTML 도구입니다. 카드 파일은 외부 서버로 업로드되지 않습니다. 룰과 매너를 지켜 듀얼하자! 이 프로그램을 상업적인 용도로 이용하지 말아주세요. 꼭 상대방을 배려하며 이용해주세요. @MKWOLF2022</p>
+    </div>
+
+    <div class="languageBox" aria-label="Language selector">
+      <label for="languageSelect" data-i18n="language.label">Language</label>
+      <select id="languageSelect">
+        <option value="ko" data-i18n="language.ko">한국어</option>
+        <option value="en" data-i18n="language.en">English</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="notice" data-i18n-html="app.notice">
+    <b>중요:</b> 원본 <code>.card</code> 파일은 반드시 백업하세요. 이 도구는 사용자가 제공한 ES3 설정 기준으로 만든 비공식 편집 도구입니다. 게임 업데이트로 저장 포맷이 바뀌면 수정이 필요할 수 있습니다. 지나친 사용은 게임의 재미를 저해할 수 있습니다. 꼭 배려를 하면서 사용해주세요. 게임 개발자의 요청시 비공개됩니다.
+  </div>
+</header>
+
+<main class="grid">
+  <section class="card">
+    <h2 data-i18n="sections.open.title">1. 파일 열기</h2>
+    <p class="muted" data-i18n-html="sections.open.description">먼저 <code>ES3Defaults.asset</code>와 <code>.card</code> 파일을 선택한 뒤 “카드 열기/분석”을 누르세요.</p>
+
+    <div class="row">
+      <label for="defaultsFile" data-i18n="fields.defaults">ES3Defaults.asset</label>
+      <input id="defaultsFile" type="file" accept=".asset,.txt,.yaml,.yml,*/*" />
+    </div>
+    <div class="row">
+      <label for="passwordInput" data-i18n="fields.password">비밀번호</label>
+      <input id="passwordInput" type="text" value="twoweeks" autocomplete="off" />
+    </div>
+    <p class="muted" data-i18n-html="sections.open.passwordHelp">ES3Defaults.asset을 넣으면 <code>encryptionPassword</code>를 자동으로 읽습니다. 수동 입력값이 비어있지 않으면 이 값을 사용합니다.</p>
+
+    <div class="row">
+      <label for="cardFile" data-i18n="fields.cardFile">카드 파일</label>
+      <input id="cardFile" type="file" accept=".card,*/*" />
+    </div>
+
+    <button id="openBtn" data-i18n="buttons.open">카드 열기/분석</button>
+    <button id="clearBtn" class="secondary" data-i18n="buttons.clear">초기화</button>
+
+    <h3 class="statusTitle" data-i18n="sections.status.title">상태</h3>
+    <div id="status" class="status" data-i18n="status.idle">대기 중입니다.</div>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="sections.summary.title">2. 카드 정보</h2>
+    <div id="summary" class="summary">
+      <div class="pill"><b data-i18n="summary.statusLabel">상태</b><span data-i18n="summary.notOpened">아직 카드가 열리지 않았습니다.</span></div>
+    </div>
+    <details>
+      <summary data-i18n="sections.summary.supportedStructure">지원하는 구조</summary>
+      <pre data-i18n="sections.summary.structureText">ES3 JSON format=0
+AES-CBC encryptionType=1
+Gzip compressionType=1
+PBKDF2-HMAC-SHA1(password, salt=IV, iterations=100, key=16 bytes)
+.card 앞 16바이트 = IV
+image1Bytes/image2Bytes/image3Bytes = base64 이미지 바이트</pre>
+    </details>
+  </section>
+
+  <section class="card wide">
+    <h2 data-i18n="sections.images.title">3. 이미지 확인 / 교체</h2>
+    <p class="muted" data-i18n-html="sections.images.description">카드가 열리면 <code>image1Bytes</code>, <code>image2Bytes</code>, <code>image3Bytes</code> 미리보기가 표시됩니다. 각 레이어에 새 이미지 파일(PNG 권장)을 넣고 repack할 수 있습니다. 투명도를 허용합니다.</p>
+    <div id="images" class="images"></div>
+  </section>
+
+  <section class="card wide">
+    <h2 data-i18n="sections.unpack.title">4. Unpack 다운로드</h2>
+    <p class="muted" data-i18n-html="sections.unpack.description">현재 열린 카드의 <code>card.json</code>, 이미지 파일, <code>manifest.json</code>을 ZIP으로 저장합니다.</p>
+    <button id="downloadZipBtn" disabled data-i18n="buttons.downloadZip">unpacked ZIP 다운로드</button>
+    <button id="downloadJsonBtn" class="secondary" disabled data-i18n="buttons.downloadJson">card.json만 다운로드</button>
+  </section>
+
+  <section class="card wide">
+    <h2 data-i18n="sections.repack.title">5. JSON 고급 편집 / Repack</h2>
+    <p class="muted" data-i18n="sections.repack.description">일반적으로 이미지만 바꾸면 됩니다. 카드 이름/수치까지 직접 바꾸려면 JSON을 수정한 뒤 repack하세요. JSON 구조를 망가뜨리면 게임에서 열리지 않을 수 있습니다.</p>
+    <div class="row">
+      <label for="jsonImport" data-i18n="fields.jsonImport">card.json 불러오기</label>
+      <input id="jsonImport" type="file" accept=".json,application/json,*/*" />
+    </div>
+    <textarea id="jsonText" spellcheck="false" data-i18n-placeholder="placeholders.jsonText" placeholder="카드를 열면 내부 ES3 JSON이 여기에 표시됩니다."></textarea>
+    <div class="buttonRow">
+      <button id="applyJsonBtn" class="warning" disabled data-i18n="buttons.applyJson">JSON을 현재 카드에 적용</button>
+      <button id="repackBtn" class="teal" disabled data-i18n="buttons.repack">새 .card 다운로드</button>
+    </div>
+  </section>
+</main>
+
+<script src="translations.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
